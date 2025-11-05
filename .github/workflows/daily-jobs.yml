@@ -1,0 +1,43 @@
+name: Daily Analyst Jobs Update
+
+on:
+  schedule:
+    - cron: '30 4 * * *'
+  workflow_dispatch:
+
+jobs:
+  fetch-and-update-jobs:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install requests pandas python-dateutil beautifulsoup4
+    - name: Fetch live analyst jobs
+      env:
+        RAPIDAPI_KEY: ${{ secrets.RAPIDAPI_KEY }}
+      run: python scripts/fetch_live_jobs.py
+    - name: Create dated branch and commit
+      run: |
+        DATE=$(date +'%Y-%m-%d')
+        BRANCH="jobs-update-$DATE"
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git checkout -b $BRANCH
+        git add data/$DATE/
+        git add README.md
+        if git diff --staged --quiet; then
+          echo "No new jobs found today"
+          exit 0
+        fi
+        git commit -m "Daily analyst jobs update - $DATE"
+        git push origin $BRANCH
+        gh pr create --title "$DATE — Daily analyst jobs update" --body "Automated daily update with $(cat job_count.txt) fresh analyst positions from RapidAPI and job boards. All URLs validated and include Job_ID/Source traceability." --base main --head $BRANCH
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
