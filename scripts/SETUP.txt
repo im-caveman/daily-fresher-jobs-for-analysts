@@ -1,0 +1,1 @@
+print('See job_automation_script.py in previous PR; hook this file to GitHub Actions to schedule daily runs')
