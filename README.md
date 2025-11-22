@@ -1,4 +1,4 @@
-# Daily Fresher Jobs for Analysts - November 5, 2024
+# Daily Fresher Jobs for Analysts
 
 ## 📊 Today's Job Summary
 - **Total Jobs Found**: 53
